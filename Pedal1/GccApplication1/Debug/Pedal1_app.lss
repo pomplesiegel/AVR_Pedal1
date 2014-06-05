@@ -1,0 +1,387 @@
+
+Pedal1_app.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000174  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00000174  00000208  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000002  00800060  00800060  00000208  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  00000208  2**0
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000060  00000000  00000000  00000238  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000004fc  00000000  00000000  00000298  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 000001b6  00000000  00000000  00000794  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000232  00000000  00000000  0000094a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  000000ac  00000000  00000000  00000b7c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000002c4  00000000  00000000  00000c28  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    000002eb  00000000  00000000  00000eec  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000050  00000000  00000000  000011d7  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	09 c0       	rjmp	.+18     	; 0x14 <__ctors_end>
+   2:	16 c0       	rjmp	.+44     	; 0x30 <__bad_interrupt>
+   4:	15 c0       	rjmp	.+42     	; 0x30 <__bad_interrupt>
+   6:	14 c0       	rjmp	.+40     	; 0x30 <__bad_interrupt>
+   8:	13 c0       	rjmp	.+38     	; 0x30 <__bad_interrupt>
+   a:	12 c0       	rjmp	.+36     	; 0x30 <__bad_interrupt>
+   c:	11 c0       	rjmp	.+34     	; 0x30 <__bad_interrupt>
+   e:	10 c0       	rjmp	.+32     	; 0x30 <__bad_interrupt>
+  10:	0f c0       	rjmp	.+30     	; 0x30 <__bad_interrupt>
+  12:	0e c0       	rjmp	.+28     	; 0x30 <__bad_interrupt>
+
+00000014 <__ctors_end>:
+  14:	11 24       	eor	r1, r1
+  16:	1f be       	out	0x3f, r1	; 63
+  18:	cf e9       	ldi	r28, 0x9F	; 159
+  1a:	cd bf       	out	0x3d, r28	; 61
+
+0000001c <__do_clear_bss>:
+  1c:	20 e0       	ldi	r18, 0x00	; 0
+  1e:	a0 e6       	ldi	r26, 0x60	; 96
+  20:	b0 e0       	ldi	r27, 0x00	; 0
+  22:	01 c0       	rjmp	.+2      	; 0x26 <.do_clear_bss_start>
+
+00000024 <.do_clear_bss_loop>:
+  24:	1d 92       	st	X+, r1
+
+00000026 <.do_clear_bss_start>:
+  26:	a2 36       	cpi	r26, 0x62	; 98
+  28:	b2 07       	cpc	r27, r18
+  2a:	e1 f7       	brne	.-8      	; 0x24 <.do_clear_bss_loop>
+  2c:	66 d0       	rcall	.+204    	; 0xfa <main>
+  2e:	a0 c0       	rjmp	.+320    	; 0x170 <_exit>
+
+00000030 <__bad_interrupt>:
+  30:	e7 cf       	rjmp	.-50     	; 0x0 <__vectors>
+
+00000032 <_Z6TurnOni>:
+//Turn on the pin of this #define name or number
+//By our convention, 'on' means this pin will have a value of Vcc Volts
+//HIGH VOLTAGE
+void TurnOn(int pinNumber) //"TurnOn seems to pull the IO high, which gives a red result"
+{
+	PORTB |= (1 << pinNumber); // Set 1 on pinNumber pin (turn on this port)
+  32:	48 b3       	in	r20, 0x18	; 24
+  34:	21 e0       	ldi	r18, 0x01	; 1
+  36:	30 e0       	ldi	r19, 0x00	; 0
+  38:	b9 01       	movw	r22, r18
+  3a:	02 c0       	rjmp	.+4      	; 0x40 <__SREG__+0x1>
+  3c:	66 0f       	add	r22, r22
+  3e:	77 1f       	adc	r23, r23
+  40:	8a 95       	dec	r24
+  42:	e2 f7       	brpl	.-8      	; 0x3c <_Z6TurnOni+0xa>
+  44:	cb 01       	movw	r24, r22
+  46:	84 2b       	or	r24, r20
+  48:	88 bb       	out	0x18, r24	; 24
+  4a:	08 95       	ret
+
+0000004c <_Z7TurnOffi>:
+//Turn off the pin of this #define name or number
+//By our convention, 'off' means this pin will have a value of 0 Volts
+//LOW VOLTAGE
+void TurnOff(int pinNumber)
+{
+	PORTB &= ~(1 << pinNumber); // Set 0 on pinNumber pin (turn off this port)
+  4c:	98 b3       	in	r25, 0x18	; 24
+  4e:	21 e0       	ldi	r18, 0x01	; 1
+  50:	30 e0       	ldi	r19, 0x00	; 0
+  52:	02 c0       	rjmp	.+4      	; 0x58 <_Z7TurnOffi+0xc>
+  54:	22 0f       	add	r18, r18
+  56:	33 1f       	adc	r19, r19
+  58:	8a 95       	dec	r24
+  5a:	e2 f7       	brpl	.-8      	; 0x54 <_Z7TurnOffi+0x8>
+  5c:	20 95       	com	r18
+  5e:	92 23       	and	r25, r18
+  60:	98 bb       	out	0x18, r25	; 24
+  62:	08 95       	ret
+
+00000064 <_Z15ButtonIsPressedv>:
+
+
+
+bool ButtonIsPressed()
+{
+	if(bit_is_clear(PINB, SWT)) //If we detect 0V on the switch
+  64:	b0 99       	sbic	0x16, 0	; 22
+  66:	0a c0       	rjmp	.+20     	; 0x7c <_Z15ButtonIsPressedv+0x18>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  68:	87 e5       	ldi	r24, 0x57	; 87
+  6a:	92 e0       	ldi	r25, 0x02	; 2
+  6c:	01 97       	sbiw	r24, 0x01	; 1
+  6e:	f1 f7       	brne	.-4      	; 0x6c <_Z15ButtonIsPressedv+0x8>
+  70:	00 c0       	rjmp	.+0      	; 0x72 <_Z15ButtonIsPressedv+0xe>
+  72:	00 00       	nop
+	{
+		_delay_ms(DEBOUNCE_TIME); // Wait DEBOUNCE_TIME ms
+		
+		if(bit_is_clear(PINB, SWT)) //If it's still 0V after the delay
+  74:	86 b3       	in	r24, 0x16	; 22
+  76:	80 95       	com	r24
+  78:	81 70       	andi	r24, 0x01	; 1
+  7a:	08 95       	ret
+		{
+			return 1; //It's a real button press
+		}
+	}
+	
+	return 0; //Otherwise, ignore it
+  7c:	80 e0       	ldi	r24, 0x00	; 0
+}
+  7e:	08 95       	ret
+
+00000080 <_Z9FlipRelayb>:
+
+
+//Switches the relay position. 'desiredRelayPosition' of 0 turns the effect off. 1 turns effect on
+void FlipRelay(bool desiredRelayPosition)
+{
+  80:	cf 93       	push	r28
+  82:	c8 2f       	mov	r28, r24
+	if(desiredRelayPosition == 0) //if it's 0
+  84:	81 11       	cpse	r24, r1
+  86:	0d c0       	rjmp	.+26     	; 0xa2 <__stack+0x3>
+	{
+		//turn effect off
+		TurnOn(RELAY_NEG);
+  88:	82 e0       	ldi	r24, 0x02	; 2
+  8a:	90 e0       	ldi	r25, 0x00	; 0
+  8c:	d2 df       	rcall	.-92     	; 0x32 <_Z6TurnOni>
+  8e:	8b e2       	ldi	r24, 0x2B	; 43
+  90:	91 e0       	ldi	r25, 0x01	; 1
+  92:	01 97       	sbiw	r24, 0x01	; 1
+  94:	f1 f7       	brne	.-4      	; 0x92 <_Z9FlipRelayb+0x12>
+  96:	00 c0       	rjmp	.+0      	; 0x98 <_Z9FlipRelayb+0x18>
+  98:	00 00       	nop
+		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
+		TurnOff(RELAY_NEG);	
+  9a:	82 e0       	ldi	r24, 0x02	; 2
+  9c:	90 e0       	ldi	r25, 0x00	; 0
+  9e:	d6 df       	rcall	.-84     	; 0x4c <_Z7TurnOffi>
+  a0:	0c c0       	rjmp	.+24     	; 0xba <__stack+0x1b>
+	}	
+	
+	else //if it's 1
+	{
+		//turn effect on
+		TurnOn(RELAY_POS);
+  a2:	81 e0       	ldi	r24, 0x01	; 1
+  a4:	90 e0       	ldi	r25, 0x00	; 0
+  a6:	c5 df       	rcall	.-118    	; 0x32 <_Z6TurnOni>
+  a8:	8b e2       	ldi	r24, 0x2B	; 43
+  aa:	91 e0       	ldi	r25, 0x01	; 1
+  ac:	01 97       	sbiw	r24, 0x01	; 1
+  ae:	f1 f7       	brne	.-4      	; 0xac <__stack+0xd>
+  b0:	00 c0       	rjmp	.+0      	; 0xb2 <__stack+0x13>
+  b2:	00 00       	nop
+		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
+		TurnOff(RELAY_POS);	
+  b4:	81 e0       	ldi	r24, 0x01	; 1
+  b6:	90 e0       	ldi	r25, 0x00	; 0
+  b8:	c9 df       	rcall	.-110    	; 0x4c <_Z7TurnOffi>
+	}	
+	
+	relayPosition = desiredRelayPosition; //We've achieved the desired relay state
+  ba:	c0 93 61 00 	sts	0x0061, r28
+}
+  be:	cf 91       	pop	r28
+  c0:	08 95       	ret
+
+000000c2 <_Z12TurnOnEffectv>:
+
+void TurnOnEffect()
+{
+	TurnOn(LED); //Drive LED high
+  c2:	83 e0       	ldi	r24, 0x03	; 3
+  c4:	90 e0       	ldi	r25, 0x00	; 0
+  c6:	b5 df       	rcall	.-150    	; 0x32 <_Z6TurnOni>
+	FlipRelay(1); //Switch relay position
+  c8:	81 e0       	ldi	r24, 0x01	; 1
+  ca:	da df       	rcall	.-76     	; 0x80 <_Z9FlipRelayb>
+	TurnOff(FET_MUTE); //Drive FET_MUTE low
+  cc:	84 e0       	ldi	r24, 0x04	; 4
+  ce:	90 e0       	ldi	r25, 0x00	; 0
+  d0:	bd df       	rcall	.-134    	; 0x4c <_Z7TurnOffi>
+	
+	effectState = 1;
+  d2:	81 e0       	ldi	r24, 0x01	; 1
+  d4:	80 93 60 00 	sts	0x0060, r24
+  d8:	08 95       	ret
+
+000000da <_Z13TurnOffEffectv>:
+}
+
+void TurnOffEffect()
+{
+	TurnOff(LED); //Drive LED low
+  da:	83 e0       	ldi	r24, 0x03	; 3
+  dc:	90 e0       	ldi	r25, 0x00	; 0
+  de:	b6 df       	rcall	.-148    	; 0x4c <_Z7TurnOffi>
+	FlipRelay(0); //Switch relay position
+  e0:	80 e0       	ldi	r24, 0x00	; 0
+  e2:	ce df       	rcall	.-100    	; 0x80 <_Z9FlipRelayb>
+	TurnOn(FET_MUTE); //Drive FET_MUTE high
+  e4:	84 e0       	ldi	r24, 0x04	; 4
+  e6:	90 e0       	ldi	r25, 0x00	; 0
+  e8:	a4 df       	rcall	.-184    	; 0x32 <_Z6TurnOni>
+	
+	effectState = 0;
+  ea:	10 92 60 00 	sts	0x0060, r1
+  ee:	08 95       	ret
+
+000000f0 <_Z8InitGPIOv>:
+
+void InitGPIO()
+{
+	//inputs - SET input direction on all of these pins
+	//Default data direction is an input
+	PORTB |= (1 << SWT); //Enable pull-up resistor on SWT
+  f0:	c0 9a       	sbi	0x18, 0	; 24
+	
+	//outputs - SET output direction on all of these pins
+	DDRB = (1 << RELAY_POS) | (1 << RELAY_NEG) | (1 << LED) | (1 << FET_MUTE); // Set output direction for these ports
+  f2:	8e e1       	ldi	r24, 0x1E	; 30
+  f4:	87 bb       	out	0x17, r24	; 23
+	
+	//Initial states for outputs
+	TurnOffEffect();
+  f6:	f1 df       	rcall	.-30     	; 0xda <_Z13TurnOffEffectv>
+  f8:	08 95       	ret
+
+000000fa <main>:
+//void toggle_led();
+
+
+int main(void)
+{
+	InitGPIO();
+  fa:	fa df       	rcall	.-12     	; 0xf0 <_Z8InitGPIOv>
+	unsigned int momentaryCounter = 0;
+  fc:	c0 e0       	ldi	r28, 0x00	; 0
+  fe:	d0 e0       	ldi	r29, 0x00	; 0
+					{
+						_delay_ms(10); //Wait another few ms, then re-poll
+					}
+					
+					TurnOffEffect(); //When button's no longer down, turn the effect off
+					momentaryCounter = 0; //Reset momentary counter
+ 100:	00 e0       	ldi	r16, 0x00	; 0
+ 102:	10 e0       	ldi	r17, 0x00	; 0
+	InitGPIO();
+	unsigned int momentaryCounter = 0;
+		
+	while(1)
+	{
+		if(ButtonIsPressed())
+ 104:	af df       	rcall	.-162    	; 0x64 <_Z15ButtonIsPressedv>
+ 106:	88 23       	and	r24, r24
+ 108:	e9 f3       	breq	.-6      	; 0x104 <main+0xa>
+		{
+			if(effectState == 0)
+ 10a:	80 91 60 00 	lds	r24, 0x0060
+ 10e:	81 11       	cpse	r24, r1
+ 110:	1b c0       	rjmp	.+54     	; 0x148 <main+0x4e>
+			{
+				TurnOnEffect();
+ 112:	d7 df       	rcall	.-82     	; 0xc2 <_Z12TurnOnEffectv>
+ 114:	8f e5       	ldi	r24, 0x5F	; 95
+ 116:	9a ee       	ldi	r25, 0xEA	; 234
+ 118:	01 97       	sbiw	r24, 0x01	; 1
+ 11a:	f1 f7       	brne	.-4      	; 0x118 <main+0x1e>
+ 11c:	00 c0       	rjmp	.+0      	; 0x11e <main+0x24>
+ 11e:	00 00       	nop
+				_delay_ms(LOCK_INPUT_TIME);
+				
+				//Momentary prototype
+				while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD)
+ 120:	a1 df       	rcall	.-190    	; 0x64 <_Z15ButtonIsPressedv>
+ 122:	88 23       	and	r24, r24
+ 124:	09 f1       	breq	.+66     	; 0x168 <main+0x6e>
+ 126:	c6 30       	cpi	r28, 0x06	; 6
+ 128:	d1 05       	cpc	r29, r1
+ 12a:	b0 f0       	brcs	.+44     	; 0x158 <main+0x5e>
+ 12c:	06 c0       	rjmp	.+12     	; 0x13a <main+0x40>
+ 12e:	87 eb       	ldi	r24, 0xB7	; 183
+ 130:	9b e0       	ldi	r25, 0x0B	; 11
+ 132:	01 97       	sbiw	r24, 0x01	; 1
+ 134:	f1 f7       	brne	.-4      	; 0x132 <main+0x38>
+ 136:	00 c0       	rjmp	.+0      	; 0x138 <main+0x3e>
+ 138:	00 00       	nop
+				}
+				
+				if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD) //If the button's been held down for long enough
+				{
+					//Enter momentary mode
+					while (ButtonIsPressed()) //While the button's still pressed in momentary mode
+ 13a:	94 df       	rcall	.-216    	; 0x64 <_Z15ButtonIsPressedv>
+ 13c:	81 11       	cpse	r24, r1
+ 13e:	f7 cf       	rjmp	.-18     	; 0x12e <main+0x34>
+					{
+						_delay_ms(10); //Wait another few ms, then re-poll
+					}
+					
+					TurnOffEffect(); //When button's no longer down, turn the effect off
+ 140:	cc df       	rcall	.-104    	; 0xda <_Z13TurnOffEffectv>
+					momentaryCounter = 0; //Reset momentary counter
+ 142:	c0 2f       	mov	r28, r16
+ 144:	d1 2f       	mov	r29, r17
+ 146:	de cf       	rjmp	.-68     	; 0x104 <main+0xa>
+				
+			}
+			
+			else
+			{
+				TurnOffEffect();
+ 148:	c8 df       	rcall	.-112    	; 0xda <_Z13TurnOffEffectv>
+ 14a:	8f e5       	ldi	r24, 0x5F	; 95
+ 14c:	9a ee       	ldi	r25, 0xEA	; 234
+ 14e:	01 97       	sbiw	r24, 0x01	; 1
+ 150:	f1 f7       	brne	.-4      	; 0x14e <main+0x54>
+ 152:	00 c0       	rjmp	.+0      	; 0x154 <main+0x5a>
+ 154:	00 00       	nop
+ 156:	d6 cf       	rjmp	.-84     	; 0x104 <main+0xa>
+				_delay_ms(LOCK_INPUT_TIME);
+				
+				//Momentary prototype
+				while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD)
+				{
+					momentaryCounter++;
+ 158:	21 96       	adiw	r28, 0x01	; 1
+ 15a:	8f e2       	ldi	r24, 0x2F	; 47
+ 15c:	95 e7       	ldi	r25, 0x75	; 117
+ 15e:	01 97       	sbiw	r24, 0x01	; 1
+ 160:	f1 f7       	brne	.-4      	; 0x15e <main+0x64>
+ 162:	00 c0       	rjmp	.+0      	; 0x164 <main+0x6a>
+ 164:	00 00       	nop
+ 166:	dc cf       	rjmp	.-72     	; 0x120 <main+0x26>
+					_delay_ms(100);
+				}
+				
+				if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD) //If the button's been held down for long enough
+ 168:	c6 30       	cpi	r28, 0x06	; 6
+ 16a:	d1 05       	cpc	r29, r1
+ 16c:	58 f2       	brcs	.-106    	; 0x104 <main+0xa>
+ 16e:	e5 cf       	rjmp	.-54     	; 0x13a <main+0x40>
+
+00000170 <_exit>:
+ 170:	f8 94       	cli
+
+00000172 <__stop_program>:
+ 172:	ff cf       	rjmp	.-2      	; 0x172 <__stop_program>

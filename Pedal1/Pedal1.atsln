@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Pedal1_app", "GccApplication1\Pedal1_app.cppproj", "{77131B71-2F97-495E-89E6-10878BEBA4DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77131B71-2F97-495E-89E6-10878BEBA4DD}.Debug|AVR.ActiveCfg = Debug|AVR
+		{77131B71-2F97-495E-89E6-10878BEBA4DD}.Debug|AVR.Build.0 = Debug|AVR
+		{77131B71-2F97-495E-89E6-10878BEBA4DD}.Release|AVR.ActiveCfg = Release|AVR
+		{77131B71-2F97-495E-89E6-10878BEBA4DD}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
