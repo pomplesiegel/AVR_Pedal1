@@ -18,23 +18,45 @@
 #define LED PB3 // LED pin
 #define FET_MUTE PB4 // FET_MUTE control output
 
+#define F_CPU 1200000UL //Hz - Define software reference clock for delay duration
+
 //Switch parameters
-#define DEBOUNCE_TIME 2        /* time to wait while "de-bouncing" button */
-#define LOCK_INPUT_TIME 200     /* time to wait after a button press */
+//#define DEBOUNCE_TIME 2        /* time to wait while "de-bouncing" button */
+//#define LOCK_INPUT_TIME 200     /* time to wait after a button press */
+//
+//Switch parameters
+const int DEBOUNCE_TIME = 2; //ms - Time in-between button press checks, used to debounce the input switch
+const int LOCK_INPUT_TIME = 200; //ms - How long after detecting actual button press to not accept any new button presses
 
-//Output parameters
-#define RELAY_FLIP_HIGH_VOLTAGE_TIME 1
+////Output parameters
+//#define RELAY_FLIP_HIGH_VOLTAGE_TIME 1
+//
+////Output parameters
+const int RELAY_FLIP_HIGH_VOLTAGE_TIME = 4; //ms - How long to hold voltage when switching relay position
 
-//Momentary feature parameters
-#define MOMENTARY_COUNTER_THRESHOLD 5
+////Momentary feature parameters
+//#define MOMENTARY_COUNTER_THRESHOLD 5
+////Momentary feature parameters
+const int MOMENTARY_COUNTER_THRESHOLD_FROM_OFF = 6; //Number of MOMENTARY_WAIT_PERIODs before entering momentary mode
+const int MOMENTARY_WAIT_PERIOD_FROM_OFF = 100; //ms - time of each waiting period for each momentary check. Total wait time is MOMENTARY_WAIT_PERIOD * MOMENTARY_COUNTER_THRESHOLD seconds
+
+const int MOMENTARY_COUNTER_THRESHOLD_FROM_ON = 4; //Number of MOMENTARY_WAIT_PERIODs before entering momentary mode
+const int MOMENTARY_WAIT_PERIOD_FROM_ON = 100; //ms - time of each waiting period for each momentary check. Total wait time is MOMENTARY_WAIT_PERIOD * MOMENTARY_COUNTER_THRESHOLD seconds
 
 
-#define F_CPU 1200000UL // Define software reference clock for delay duration
+
+//ms - Determines time period between when momentary mode comes up for air, checks to see if user is still holding down button. Also determines LED flicker rate during momentary mode.
+const int MOMENTARY_MODE_ACTIVE_POLL_PERIOD = 49;
+
+const int HOLD_OFF_MODE_ACTIVE_POLL_PERIOD = 10; //ms - How often to poll switch when user is holding pedal in 'off' position, with their foot held on the switch
+
+
 
 
 //Global variables
-bool relayPosition; //Keeps state for relay position, as this is a momentary change
 bool effectState; //Keeps state for the effect
+unsigned int momentaryCounter = 0; //Counts number of times to come up for air from _delay, before we've entered momentary mode.
+
 
 #include <avr/io.h>
 #include <inttypes.h>
@@ -81,28 +103,28 @@ void FlipRelay(bool desiredRelayPosition)
 {
 	if(desiredRelayPosition == 0) //if it's 0
 	{
-		//turn effect off
-		TurnOn(RELAY_NEG);
+		//turn effect off, by applying pos voltage to the + side
+		TurnOn(RELAY_POS);
 		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_NEG);	
-	}	
+		TurnOff(RELAY_POS);
+	}
 	
 	else //if it's 1
 	{
-		//turn effect on
-		TurnOn(RELAY_POS);
+		//turn effect on, , by applying pos voltage to the - side
+		TurnOn(RELAY_NEG);
 		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_POS);	
-	}	
-	
-	relayPosition = desiredRelayPosition; //We've achieved the desired relay state
+		TurnOff(RELAY_NEG);
+	}
 }
 
 void TurnOnEffect()
 {
 	TurnOn(LED); //Drive LED high
+	
+	//TurnOn(FET_MUTE); //Mute
 	FlipRelay(1); //Switch relay position
-	TurnOff(FET_MUTE); //Drive FET_MUTE low
+	TurnOff(FET_MUTE); //Unmute
 	
 	effectState = 1;
 }
@@ -110,8 +132,10 @@ void TurnOnEffect()
 void TurnOffEffect()
 {
 	TurnOff(LED); //Drive LED low
+	
+	//TurnOn(FET_MUTE); //Mute
 	FlipRelay(0); //Switch relay position
-	TurnOn(FET_MUTE); //Drive FET_MUTE high
+	TurnOn(FET_MUTE); //Mute effect side - ready for next switch
 	
 	effectState = 0;
 }
@@ -138,5 +162,77 @@ void InitGPIO()
 	//Initial states for outputs
 	TurnOffEffect();
 }
+
+
+
+//Momentary features
+
+bool MomentaryTriggerDetectedFromOff()
+{
+	momentaryCounter = 0; //reset
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_OFF)
+	{
+		momentaryCounter++;
+		_delay_ms(MOMENTARY_WAIT_PERIOD_FROM_OFF);
+	}
+	
+	if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD_FROM_OFF) //If the button's been held down for long enough
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+//Momentary trigger detector from 'On' position - differerent time constants
+bool MomentaryTriggerDetectedFromOn()
+{
+	momentaryCounter = 0; //reset
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_ON)
+	{
+		momentaryCounter++;
+		_delay_ms(MOMENTARY_WAIT_PERIOD_FROM_ON);
+	}
+	
+	if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD_FROM_ON) //If the button's been held down for long enough
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+void EnterMomentaryMode()
+{
+	//Enter momentary mode
+	while (ButtonIsPressed()) //While the button's still pressed in momentary mode
+	{
+		toggle_led(); //Toggle LED to indicate momentary mode
+		_delay_ms(MOMENTARY_MODE_ACTIVE_POLL_PERIOD); //Wait another few ms, then re-poll to see if user's foot is still on button
+	}
+	
+	TurnOffEffect(); //When button's no longer down, turn the effect off
+	//momentaryCounter = 0; //Reset momentary counter
+}
+
+void WaitUntilButtonReleased()
+{
+	while(ButtonIsPressed())
+	{
+		_delay_ms(HOLD_OFF_MODE_ACTIVE_POLL_PERIOD); //Wait another few ms, then re-poll to see if user's foot is still on button
+	}
+	
+	//momentaryCounter = 0;
+}
+
+
+
+
+
+
 
 #endif /* BASICMETHODS_H_ */

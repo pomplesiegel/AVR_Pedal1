@@ -3,29 +3,29 @@ Pedal1_app.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000174  00000000  00000000  00000094  2**1
+  0 .text         00000202  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00000174  00000208  2**0
+  1 .data         00000000  00800060  00000202  00000296  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .bss          00000002  00800060  00800060  00000208  2**0
+  2 .bss          00000003  00800060  00800060  00000296  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000208  2**0
+  3 .comment      00000030  00000000  00000000  00000296  2**0
                   CONTENTS, READONLY
-  4 .debug_aranges 00000060  00000000  00000000  00000238  2**0
+  4 .debug_aranges 00000080  00000000  00000000  000002c6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000004fc  00000000  00000000  00000298  2**0
+  5 .debug_info   00000687  00000000  00000000  00000346  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000001b6  00000000  00000000  00000794  2**0
+  6 .debug_abbrev 000001c6  00000000  00000000  000009cd  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000232  00000000  00000000  0000094a  2**0
+  7 .debug_line   00000290  00000000  00000000  00000b93  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000000ac  00000000  00000000  00000b7c  2**2
+  8 .debug_frame  000000e4  00000000  00000000  00000e24  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000002c4  00000000  00000000  00000c28  2**0
+  9 .debug_str    000004a8  00000000  00000000  00000f08  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000002eb  00000000  00000000  00000eec  2**0
+ 10 .debug_loc    00000250  00000000  00000000  000013b0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000050  00000000  00000000  000011d7  2**0
+ 11 .debug_ranges 00000070  00000000  00000000  00001600  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -58,11 +58,11 @@ Disassembly of section .text:
   24:	1d 92       	st	X+, r1
 
 00000026 <.do_clear_bss_start>:
-  26:	a2 36       	cpi	r26, 0x62	; 98
+  26:	a3 36       	cpi	r26, 0x63	; 99
   28:	b2 07       	cpc	r27, r18
   2a:	e1 f7       	brne	.-8      	; 0x24 <.do_clear_bss_loop>
-  2c:	66 d0       	rcall	.+204    	; 0xfa <main>
-  2e:	a0 c0       	rjmp	.+320    	; 0x170 <_exit>
+  2c:	c8 d0       	rcall	.+400    	; 0x1be <main>
+  2e:	e7 c0       	rjmp	.+462    	; 0x1fe <_exit>
 
 00000030 <__bad_interrupt>:
   30:	e7 cf       	rjmp	.-50     	; 0x0 <__vectors>
@@ -153,97 +153,108 @@ bool ButtonIsPressed()
 //Switches the relay position. 'desiredRelayPosition' of 0 turns the effect off. 1 turns effect on
 void FlipRelay(bool desiredRelayPosition)
 {
-  80:	cf 93       	push	r28
-  82:	c8 2f       	mov	r28, r24
 	if(desiredRelayPosition == 0) //if it's 0
-  84:	81 11       	cpse	r24, r1
-  86:	0d c0       	rjmp	.+26     	; 0xa2 <__stack+0x3>
+  80:	81 11       	cpse	r24, r1
+  82:	0d c0       	rjmp	.+26     	; 0x9e <_Z9FlipRelayb+0x1e>
 	{
-		//turn effect off
-		TurnOn(RELAY_NEG);
-  88:	82 e0       	ldi	r24, 0x02	; 2
-  8a:	90 e0       	ldi	r25, 0x00	; 0
-  8c:	d2 df       	rcall	.-92     	; 0x32 <_Z6TurnOni>
-  8e:	8b e2       	ldi	r24, 0x2B	; 43
-  90:	91 e0       	ldi	r25, 0x01	; 1
-  92:	01 97       	sbiw	r24, 0x01	; 1
-  94:	f1 f7       	brne	.-4      	; 0x92 <_Z9FlipRelayb+0x12>
-  96:	00 c0       	rjmp	.+0      	; 0x98 <_Z9FlipRelayb+0x18>
-  98:	00 00       	nop
+		//turn effect off, by applying pos voltage to the + side
+		TurnOn(RELAY_POS);
+  84:	81 e0       	ldi	r24, 0x01	; 1
+  86:	90 e0       	ldi	r25, 0x00	; 0
+  88:	d4 df       	rcall	.-88     	; 0x32 <_Z6TurnOni>
+  8a:	8f ea       	ldi	r24, 0xAF	; 175
+  8c:	94 e0       	ldi	r25, 0x04	; 4
+  8e:	01 97       	sbiw	r24, 0x01	; 1
+  90:	f1 f7       	brne	.-4      	; 0x8e <_Z9FlipRelayb+0xe>
+  92:	00 c0       	rjmp	.+0      	; 0x94 <_Z9FlipRelayb+0x14>
+  94:	00 00       	nop
 		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_NEG);	
-  9a:	82 e0       	ldi	r24, 0x02	; 2
-  9c:	90 e0       	ldi	r25, 0x00	; 0
-  9e:	d6 df       	rcall	.-84     	; 0x4c <_Z7TurnOffi>
-  a0:	0c c0       	rjmp	.+24     	; 0xba <__stack+0x1b>
-	}	
+		TurnOff(RELAY_POS);
+  96:	81 e0       	ldi	r24, 0x01	; 1
+  98:	90 e0       	ldi	r25, 0x00	; 0
+  9a:	d8 df       	rcall	.-80     	; 0x4c <_Z7TurnOffi>
+  9c:	08 95       	ret
+	}
 	
 	else //if it's 1
 	{
-		//turn effect on
-		TurnOn(RELAY_POS);
-  a2:	81 e0       	ldi	r24, 0x01	; 1
-  a4:	90 e0       	ldi	r25, 0x00	; 0
-  a6:	c5 df       	rcall	.-118    	; 0x32 <_Z6TurnOni>
-  a8:	8b e2       	ldi	r24, 0x2B	; 43
-  aa:	91 e0       	ldi	r25, 0x01	; 1
-  ac:	01 97       	sbiw	r24, 0x01	; 1
-  ae:	f1 f7       	brne	.-4      	; 0xac <__stack+0xd>
-  b0:	00 c0       	rjmp	.+0      	; 0xb2 <__stack+0x13>
-  b2:	00 00       	nop
+		//turn effect on, , by applying pos voltage to the - side
+		TurnOn(RELAY_NEG);
+  9e:	82 e0       	ldi	r24, 0x02	; 2
+  a0:	90 e0       	ldi	r25, 0x00	; 0
+  a2:	c7 df       	rcall	.-114    	; 0x32 <_Z6TurnOni>
+  a4:	8f ea       	ldi	r24, 0xAF	; 175
+  a6:	94 e0       	ldi	r25, 0x04	; 4
+  a8:	01 97       	sbiw	r24, 0x01	; 1
+  aa:	f1 f7       	brne	.-4      	; 0xa8 <__stack+0x9>
+  ac:	00 c0       	rjmp	.+0      	; 0xae <__stack+0xf>
+  ae:	00 00       	nop
 		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_POS);	
-  b4:	81 e0       	ldi	r24, 0x01	; 1
-  b6:	90 e0       	ldi	r25, 0x00	; 0
-  b8:	c9 df       	rcall	.-110    	; 0x4c <_Z7TurnOffi>
-	}	
-	
-	relayPosition = desiredRelayPosition; //We've achieved the desired relay state
-  ba:	c0 93 61 00 	sts	0x0061, r28
-}
-  be:	cf 91       	pop	r28
-  c0:	08 95       	ret
+		TurnOff(RELAY_NEG);
+  b0:	82 e0       	ldi	r24, 0x02	; 2
+  b2:	90 e0       	ldi	r25, 0x00	; 0
+  b4:	cb df       	rcall	.-106    	; 0x4c <_Z7TurnOffi>
+  b6:	08 95       	ret
 
-000000c2 <_Z12TurnOnEffectv>:
+000000b8 <_Z12TurnOnEffectv>:
+	}
+}
 
 void TurnOnEffect()
 {
 	TurnOn(LED); //Drive LED high
-  c2:	83 e0       	ldi	r24, 0x03	; 3
-  c4:	90 e0       	ldi	r25, 0x00	; 0
-  c6:	b5 df       	rcall	.-150    	; 0x32 <_Z6TurnOni>
+  b8:	83 e0       	ldi	r24, 0x03	; 3
+  ba:	90 e0       	ldi	r25, 0x00	; 0
+  bc:	ba df       	rcall	.-140    	; 0x32 <_Z6TurnOni>
+	
+	//TurnOn(FET_MUTE); //Mute
 	FlipRelay(1); //Switch relay position
-  c8:	81 e0       	ldi	r24, 0x01	; 1
-  ca:	da df       	rcall	.-76     	; 0x80 <_Z9FlipRelayb>
-	TurnOff(FET_MUTE); //Drive FET_MUTE low
-  cc:	84 e0       	ldi	r24, 0x04	; 4
-  ce:	90 e0       	ldi	r25, 0x00	; 0
-  d0:	bd df       	rcall	.-134    	; 0x4c <_Z7TurnOffi>
+  be:	81 e0       	ldi	r24, 0x01	; 1
+  c0:	df df       	rcall	.-66     	; 0x80 <_Z9FlipRelayb>
+	TurnOff(FET_MUTE); //Unmute
+  c2:	84 e0       	ldi	r24, 0x04	; 4
+  c4:	90 e0       	ldi	r25, 0x00	; 0
+  c6:	c2 df       	rcall	.-124    	; 0x4c <_Z7TurnOffi>
 	
 	effectState = 1;
-  d2:	81 e0       	ldi	r24, 0x01	; 1
-  d4:	80 93 60 00 	sts	0x0060, r24
-  d8:	08 95       	ret
+  c8:	81 e0       	ldi	r24, 0x01	; 1
+  ca:	80 93 62 00 	sts	0x0062, r24
+  ce:	08 95       	ret
 
-000000da <_Z13TurnOffEffectv>:
+000000d0 <_Z13TurnOffEffectv>:
 }
 
 void TurnOffEffect()
 {
 	TurnOff(LED); //Drive LED low
-  da:	83 e0       	ldi	r24, 0x03	; 3
-  dc:	90 e0       	ldi	r25, 0x00	; 0
-  de:	b6 df       	rcall	.-148    	; 0x4c <_Z7TurnOffi>
+  d0:	83 e0       	ldi	r24, 0x03	; 3
+  d2:	90 e0       	ldi	r25, 0x00	; 0
+  d4:	bb df       	rcall	.-138    	; 0x4c <_Z7TurnOffi>
+	
+	//TurnOn(FET_MUTE); //Mute
 	FlipRelay(0); //Switch relay position
-  e0:	80 e0       	ldi	r24, 0x00	; 0
-  e2:	ce df       	rcall	.-100    	; 0x80 <_Z9FlipRelayb>
-	TurnOn(FET_MUTE); //Drive FET_MUTE high
-  e4:	84 e0       	ldi	r24, 0x04	; 4
-  e6:	90 e0       	ldi	r25, 0x00	; 0
-  e8:	a4 df       	rcall	.-184    	; 0x32 <_Z6TurnOni>
+  d6:	80 e0       	ldi	r24, 0x00	; 0
+  d8:	d3 df       	rcall	.-90     	; 0x80 <_Z9FlipRelayb>
+	TurnOn(FET_MUTE); //Mute effect side - ready for next switch
+  da:	84 e0       	ldi	r24, 0x04	; 4
+  dc:	90 e0       	ldi	r25, 0x00	; 0
+  de:	a9 df       	rcall	.-174    	; 0x32 <_Z6TurnOni>
 	
 	effectState = 0;
-  ea:	10 92 60 00 	sts	0x0060, r1
+  e0:	10 92 62 00 	sts	0x0062, r1
+  e4:	08 95       	ret
+
+000000e6 <_Z10toggle_ledv>:
+
+
+
+void toggle_led()
+{
+	PORTB ^= _BV(LED); //XOR this bit, so we toggle it on and off with each function call
+  e6:	98 b3       	in	r25, 0x18	; 24
+  e8:	88 e0       	ldi	r24, 0x08	; 8
+  ea:	89 27       	eor	r24, r25
+  ec:	88 bb       	out	0x18, r24	; 24
   ee:	08 95       	ret
 
 000000f0 <_Z8InitGPIOv>:
@@ -262,126 +273,250 @@ void InitGPIO()
 	
 	//Initial states for outputs
 	TurnOffEffect();
-  f6:	f1 df       	rcall	.-30     	; 0xda <_Z13TurnOffEffectv>
+  f6:	ec df       	rcall	.-40     	; 0xd0 <_Z13TurnOffEffectv>
   f8:	08 95       	ret
 
-000000fa <main>:
-//void toggle_led();
+000000fa <_Z31MomentaryTriggerDetectedFromOffv>:
+
+//Momentary features
+
+bool MomentaryTriggerDetectedFromOff()
+{
+	momentaryCounter = 0; //reset
+  fa:	10 92 61 00 	sts	0x0061, r1
+  fe:	10 92 60 00 	sts	0x0060, r1
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_OFF)
+ 102:	b0 df       	rcall	.-160    	; 0x64 <_Z15ButtonIsPressedv>
+ 104:	88 23       	and	r24, r24
+ 106:	39 f0       	breq	.+14     	; 0x116 <_Z31MomentaryTriggerDetectedFromOffv+0x1c>
+ 108:	80 91 60 00 	lds	r24, 0x0060
+ 10c:	90 91 61 00 	lds	r25, 0x0061
+ 110:	87 30       	cpi	r24, 0x07	; 7
+ 112:	91 05       	cpc	r25, r1
+ 114:	50 f0       	brcs	.+20     	; 0x12a <_Z31MomentaryTriggerDetectedFromOffv+0x30>
+	{
+		momentaryCounter++;
+		_delay_ms(MOMENTARY_WAIT_PERIOD_FROM_OFF);
+	}
+	
+	if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD_FROM_OFF) //If the button's been held down for long enough
+ 116:	81 e0       	ldi	r24, 0x01	; 1
+ 118:	20 91 60 00 	lds	r18, 0x0060
+ 11c:	30 91 61 00 	lds	r19, 0x0061
+ 120:	27 30       	cpi	r18, 0x07	; 7
+ 122:	31 05       	cpc	r19, r1
+ 124:	70 f4       	brcc	.+28     	; 0x142 <_Z31MomentaryTriggerDetectedFromOffv+0x48>
+ 126:	80 e0       	ldi	r24, 0x00	; 0
+ 128:	08 95       	ret
+	momentaryCounter = 0; //reset
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_OFF)
+	{
+		momentaryCounter++;
+ 12a:	01 96       	adiw	r24, 0x01	; 1
+ 12c:	90 93 61 00 	sts	0x0061, r25
+ 130:	80 93 60 00 	sts	0x0060, r24
+ 134:	8f e2       	ldi	r24, 0x2F	; 47
+ 136:	95 e7       	ldi	r25, 0x75	; 117
+ 138:	01 97       	sbiw	r24, 0x01	; 1
+ 13a:	f1 f7       	brne	.-4      	; 0x138 <_Z31MomentaryTriggerDetectedFromOffv+0x3e>
+ 13c:	00 c0       	rjmp	.+0      	; 0x13e <_Z31MomentaryTriggerDetectedFromOffv+0x44>
+ 13e:	00 00       	nop
+ 140:	e0 cf       	rjmp	.-64     	; 0x102 <_Z31MomentaryTriggerDetectedFromOffv+0x8>
+	{
+		return true;
+	}
+	
+	return false;
+}
+ 142:	08 95       	ret
+
+00000144 <_Z30MomentaryTriggerDetectedFromOnv>:
+
+//Momentary trigger detector from 'On' position - differerent time constants
+bool MomentaryTriggerDetectedFromOn()
+{
+	momentaryCounter = 0; //reset
+ 144:	10 92 61 00 	sts	0x0061, r1
+ 148:	10 92 60 00 	sts	0x0060, r1
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_ON)
+ 14c:	8b df       	rcall	.-234    	; 0x64 <_Z15ButtonIsPressedv>
+ 14e:	88 23       	and	r24, r24
+ 150:	39 f0       	breq	.+14     	; 0x160 <_Z30MomentaryTriggerDetectedFromOnv+0x1c>
+ 152:	80 91 60 00 	lds	r24, 0x0060
+ 156:	90 91 61 00 	lds	r25, 0x0061
+ 15a:	85 30       	cpi	r24, 0x05	; 5
+ 15c:	91 05       	cpc	r25, r1
+ 15e:	50 f0       	brcs	.+20     	; 0x174 <_Z30MomentaryTriggerDetectedFromOnv+0x30>
+	{
+		momentaryCounter++;
+		_delay_ms(MOMENTARY_WAIT_PERIOD_FROM_ON);
+	}
+	
+	if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD_FROM_ON) //If the button's been held down for long enough
+ 160:	81 e0       	ldi	r24, 0x01	; 1
+ 162:	20 91 60 00 	lds	r18, 0x0060
+ 166:	30 91 61 00 	lds	r19, 0x0061
+ 16a:	25 30       	cpi	r18, 0x05	; 5
+ 16c:	31 05       	cpc	r19, r1
+ 16e:	70 f4       	brcc	.+28     	; 0x18c <_Z30MomentaryTriggerDetectedFromOnv+0x48>
+ 170:	80 e0       	ldi	r24, 0x00	; 0
+ 172:	08 95       	ret
+	momentaryCounter = 0; //reset
+	
+	//Momentary prototype
+	while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD_FROM_ON)
+	{
+		momentaryCounter++;
+ 174:	01 96       	adiw	r24, 0x01	; 1
+ 176:	90 93 61 00 	sts	0x0061, r25
+ 17a:	80 93 60 00 	sts	0x0060, r24
+ 17e:	8f e2       	ldi	r24, 0x2F	; 47
+ 180:	95 e7       	ldi	r25, 0x75	; 117
+ 182:	01 97       	sbiw	r24, 0x01	; 1
+ 184:	f1 f7       	brne	.-4      	; 0x182 <_Z30MomentaryTriggerDetectedFromOnv+0x3e>
+ 186:	00 c0       	rjmp	.+0      	; 0x188 <_Z30MomentaryTriggerDetectedFromOnv+0x44>
+ 188:	00 00       	nop
+ 18a:	e0 cf       	rjmp	.-64     	; 0x14c <_Z30MomentaryTriggerDetectedFromOnv+0x8>
+	{
+		return true;
+	}
+	
+	return false;
+}
+ 18c:	08 95       	ret
+
+0000018e <_Z18EnterMomentaryModev>:
+
+void EnterMomentaryMode()
+{
+	//Enter momentary mode
+	while (ButtonIsPressed()) //While the button's still pressed in momentary mode
+ 18e:	07 c0       	rjmp	.+14     	; 0x19e <_Z18EnterMomentaryModev+0x10>
+	{
+		toggle_led(); //Toggle LED to indicate momentary mode
+ 190:	aa df       	rcall	.-172    	; 0xe6 <_Z10toggle_ledv>
+ 192:	8b e6       	ldi	r24, 0x6B	; 107
+ 194:	99 e3       	ldi	r25, 0x39	; 57
+ 196:	01 97       	sbiw	r24, 0x01	; 1
+ 198:	f1 f7       	brne	.-4      	; 0x196 <_Z18EnterMomentaryModev+0x8>
+ 19a:	00 c0       	rjmp	.+0      	; 0x19c <_Z18EnterMomentaryModev+0xe>
+ 19c:	00 00       	nop
+}
+
+void EnterMomentaryMode()
+{
+	//Enter momentary mode
+	while (ButtonIsPressed()) //While the button's still pressed in momentary mode
+ 19e:	62 df       	rcall	.-316    	; 0x64 <_Z15ButtonIsPressedv>
+ 1a0:	81 11       	cpse	r24, r1
+ 1a2:	f6 cf       	rjmp	.-20     	; 0x190 <_Z18EnterMomentaryModev+0x2>
+	{
+		toggle_led(); //Toggle LED to indicate momentary mode
+		_delay_ms(MOMENTARY_MODE_ACTIVE_POLL_PERIOD); //Wait another few ms, then re-poll to see if user's foot is still on button
+	}
+	
+	TurnOffEffect(); //When button's no longer down, turn the effect off
+ 1a4:	95 df       	rcall	.-214    	; 0xd0 <_Z13TurnOffEffectv>
+ 1a6:	08 95       	ret
+
+000001a8 <_Z23WaitUntilButtonReleasedv>:
+	//momentaryCounter = 0; //Reset momentary counter
+}
+
+void WaitUntilButtonReleased()
+{
+	while(ButtonIsPressed())
+ 1a8:	06 c0       	rjmp	.+12     	; 0x1b6 <_Z23WaitUntilButtonReleasedv+0xe>
+ 1aa:	87 eb       	ldi	r24, 0xB7	; 183
+ 1ac:	9b e0       	ldi	r25, 0x0B	; 11
+ 1ae:	01 97       	sbiw	r24, 0x01	; 1
+ 1b0:	f1 f7       	brne	.-4      	; 0x1ae <_Z23WaitUntilButtonReleasedv+0x6>
+ 1b2:	00 c0       	rjmp	.+0      	; 0x1b4 <_Z23WaitUntilButtonReleasedv+0xc>
+ 1b4:	00 00       	nop
+ 1b6:	56 df       	rcall	.-340    	; 0x64 <_Z15ButtonIsPressedv>
+ 1b8:	81 11       	cpse	r24, r1
+ 1ba:	f7 cf       	rjmp	.-18     	; 0x1aa <_Z23WaitUntilButtonReleasedv+0x2>
+	{
+		_delay_ms(HOLD_OFF_MODE_ACTIVE_POLL_PERIOD); //Wait another few ms, then re-poll to see if user's foot is still on button
+	}
+	
+	//momentaryCounter = 0;
+}
+ 1bc:	08 95       	ret
+
+000001be <main>:
+
 
 
 int main(void)
 {
 	InitGPIO();
-  fa:	fa df       	rcall	.-12     	; 0xf0 <_Z8InitGPIOv>
-	unsigned int momentaryCounter = 0;
-  fc:	c0 e0       	ldi	r28, 0x00	; 0
-  fe:	d0 e0       	ldi	r29, 0x00	; 0
-					{
-						_delay_ms(10); //Wait another few ms, then re-poll
-					}
-					
-					TurnOffEffect(); //When button's no longer down, turn the effect off
-					momentaryCounter = 0; //Reset momentary counter
- 100:	00 e0       	ldi	r16, 0x00	; 0
- 102:	10 e0       	ldi	r17, 0x00	; 0
-	InitGPIO();
-	unsigned int momentaryCounter = 0;
-		
+ 1be:	98 df       	rcall	.-208    	; 0xf0 <_Z8InitGPIOv>
+	
+
 	while(1)
 	{
 		if(ButtonIsPressed())
- 104:	af df       	rcall	.-162    	; 0x64 <_Z15ButtonIsPressedv>
- 106:	88 23       	and	r24, r24
- 108:	e9 f3       	breq	.-6      	; 0x104 <main+0xa>
+ 1c0:	51 df       	rcall	.-350    	; 0x64 <_Z15ButtonIsPressedv>
+ 1c2:	88 23       	and	r24, r24
+ 1c4:	e9 f3       	breq	.-6      	; 0x1c0 <main+0x2>
 		{
 			if(effectState == 0)
- 10a:	80 91 60 00 	lds	r24, 0x0060
- 10e:	81 11       	cpse	r24, r1
- 110:	1b c0       	rjmp	.+54     	; 0x148 <main+0x4e>
+ 1c6:	80 91 62 00 	lds	r24, 0x0062
+ 1ca:	81 11       	cpse	r24, r1
+ 1cc:	0c c0       	rjmp	.+24     	; 0x1e6 <main+0x28>
 			{
 				TurnOnEffect();
- 112:	d7 df       	rcall	.-82     	; 0xc2 <_Z12TurnOnEffectv>
- 114:	8f e5       	ldi	r24, 0x5F	; 95
- 116:	9a ee       	ldi	r25, 0xEA	; 234
- 118:	01 97       	sbiw	r24, 0x01	; 1
- 11a:	f1 f7       	brne	.-4      	; 0x118 <main+0x1e>
- 11c:	00 c0       	rjmp	.+0      	; 0x11e <main+0x24>
- 11e:	00 00       	nop
+ 1ce:	74 df       	rcall	.-280    	; 0xb8 <_Z12TurnOnEffectv>
+ 1d0:	8f e5       	ldi	r24, 0x5F	; 95
+ 1d2:	9a ee       	ldi	r25, 0xEA	; 234
+ 1d4:	01 97       	sbiw	r24, 0x01	; 1
+ 1d6:	f1 f7       	brne	.-4      	; 0x1d4 <main+0x16>
+ 1d8:	00 c0       	rjmp	.+0      	; 0x1da <main+0x1c>
+ 1da:	00 00       	nop
 				_delay_ms(LOCK_INPUT_TIME);
+
 				
-				//Momentary prototype
-				while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD)
- 120:	a1 df       	rcall	.-190    	; 0x64 <_Z15ButtonIsPressedv>
- 122:	88 23       	and	r24, r24
- 124:	09 f1       	breq	.+66     	; 0x168 <main+0x6e>
- 126:	c6 30       	cpi	r28, 0x06	; 6
- 128:	d1 05       	cpc	r29, r1
- 12a:	b0 f0       	brcs	.+44     	; 0x158 <main+0x5e>
- 12c:	06 c0       	rjmp	.+12     	; 0x13a <main+0x40>
- 12e:	87 eb       	ldi	r24, 0xB7	; 183
- 130:	9b e0       	ldi	r25, 0x0B	; 11
- 132:	01 97       	sbiw	r24, 0x01	; 1
- 134:	f1 f7       	brne	.-4      	; 0x132 <main+0x38>
- 136:	00 c0       	rjmp	.+0      	; 0x138 <main+0x3e>
- 138:	00 00       	nop
-				}
-				
-				if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD) //If the button's been held down for long enough
+				if(MomentaryTriggerDetectedFromOff()) //If pedal is held down for long enough
+ 1dc:	8e df       	rcall	.-228    	; 0xfa <_Z31MomentaryTriggerDetectedFromOffv>
+ 1de:	88 23       	and	r24, r24
+ 1e0:	79 f3       	breq	.-34     	; 0x1c0 <main+0x2>
 				{
-					//Enter momentary mode
-					while (ButtonIsPressed()) //While the button's still pressed in momentary mode
- 13a:	94 df       	rcall	.-216    	; 0x64 <_Z15ButtonIsPressedv>
- 13c:	81 11       	cpse	r24, r1
- 13e:	f7 cf       	rjmp	.-18     	; 0x12e <main+0x34>
-					{
-						_delay_ms(10); //Wait another few ms, then re-poll
-					}
-					
-					TurnOffEffect(); //When button's no longer down, turn the effect off
- 140:	cc df       	rcall	.-104    	; 0xda <_Z13TurnOffEffectv>
-					momentaryCounter = 0; //Reset momentary counter
- 142:	c0 2f       	mov	r28, r16
- 144:	d1 2f       	mov	r29, r17
- 146:	de cf       	rjmp	.-68     	; 0x104 <main+0xa>
+					EnterMomentaryMode(); //Enter momentary mode, in which holding down the pedal engages the effect until the user lets go
+ 1e2:	d5 df       	rcall	.-86     	; 0x18e <_Z18EnterMomentaryModev>
+ 1e4:	ed cf       	rjmp	.-38     	; 0x1c0 <main+0x2>
+				//EnterMomentaryMode(); //Enter momentary mode, in which holding down the pedal engages the effect until the user lets go
+				//}
 				
-			}
-			
-			else
-			{
+				//else
+				//{
 				TurnOffEffect();
- 148:	c8 df       	rcall	.-112    	; 0xda <_Z13TurnOffEffectv>
- 14a:	8f e5       	ldi	r24, 0x5F	; 95
- 14c:	9a ee       	ldi	r25, 0xEA	; 234
- 14e:	01 97       	sbiw	r24, 0x01	; 1
- 150:	f1 f7       	brne	.-4      	; 0x14e <main+0x54>
- 152:	00 c0       	rjmp	.+0      	; 0x154 <main+0x5a>
- 154:	00 00       	nop
- 156:	d6 cf       	rjmp	.-84     	; 0x104 <main+0xa>
+ 1e6:	74 df       	rcall	.-280    	; 0xd0 <_Z13TurnOffEffectv>
+ 1e8:	8f e5       	ldi	r24, 0x5F	; 95
+ 1ea:	9a ee       	ldi	r25, 0xEA	; 234
+ 1ec:	01 97       	sbiw	r24, 0x01	; 1
+ 1ee:	f1 f7       	brne	.-4      	; 0x1ec <main+0x2e>
+ 1f0:	00 c0       	rjmp	.+0      	; 0x1f2 <main+0x34>
+ 1f2:	00 00       	nop
 				_delay_ms(LOCK_INPUT_TIME);
 				
-				//Momentary prototype
-				while (ButtonIsPressed() && momentaryCounter <= MOMENTARY_COUNTER_THRESHOLD)
+				if(MomentaryTriggerDetectedFromOn())
+ 1f4:	a7 df       	rcall	.-178    	; 0x144 <_Z30MomentaryTriggerDetectedFromOnv>
+ 1f6:	88 23       	and	r24, r24
+ 1f8:	19 f3       	breq	.-58     	; 0x1c0 <main+0x2>
 				{
-					momentaryCounter++;
- 158:	21 96       	adiw	r28, 0x01	; 1
- 15a:	8f e2       	ldi	r24, 0x2F	; 47
- 15c:	95 e7       	ldi	r25, 0x75	; 117
- 15e:	01 97       	sbiw	r24, 0x01	; 1
- 160:	f1 f7       	brne	.-4      	; 0x15e <main+0x64>
- 162:	00 c0       	rjmp	.+0      	; 0x164 <main+0x6a>
- 164:	00 00       	nop
- 166:	dc cf       	rjmp	.-72     	; 0x120 <main+0x26>
-					_delay_ms(100);
-				}
-				
-				if(momentaryCounter > MOMENTARY_COUNTER_THRESHOLD) //If the button's been held down for long enough
- 168:	c6 30       	cpi	r28, 0x06	; 6
- 16a:	d1 05       	cpc	r29, r1
- 16c:	58 f2       	brcs	.-106    	; 0x104 <main+0xa>
- 16e:	e5 cf       	rjmp	.-54     	; 0x13a <main+0x40>
+					WaitUntilButtonReleased();
+ 1fa:	d6 df       	rcall	.-84     	; 0x1a8 <_Z23WaitUntilButtonReleasedv>
+ 1fc:	e1 cf       	rjmp	.-62     	; 0x1c0 <main+0x2>
 
-00000170 <_exit>:
- 170:	f8 94       	cli
+000001fe <_exit>:
+ 1fe:	f8 94       	cli
 
-00000172 <__stop_program>:
- 172:	ff cf       	rjmp	.-2      	; 0x172 <__stop_program>
+00000200 <__stop_program>:
+ 200:	ff cf       	rjmp	.-2      	; 0x200 <__stop_program>
