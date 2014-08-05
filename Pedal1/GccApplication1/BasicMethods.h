@@ -26,13 +26,13 @@
 //
 //Switch parameters
 const int DEBOUNCE_TIME = 2; //ms - Time in-between button press checks, used to debounce the input switch
-const int LOCK_INPUT_TIME = 200; //ms - How long after detecting actual button press to not accept any new button presses
+const int LOCK_INPUT_TIME = 250; //ms - How long after detecting actual button press to not accept any new button presses
 
 ////Output parameters
 //#define RELAY_FLIP_HIGH_VOLTAGE_TIME 1
 //
 ////Output parameters
-const int RELAY_FLIP_HIGH_VOLTAGE_TIME = 4; //ms - How long to hold voltage when switching relay position
+//const int RELAY_FLIP_HIGH_VOLTAGE_TIME = 4; //ms - How long to hold voltage when switching relay position
 
 ////Momentary feature parameters
 //#define MOMENTARY_COUNTER_THRESHOLD 5
@@ -103,18 +103,29 @@ void FlipRelay(bool desiredRelayPosition)
 {
 	if(desiredRelayPosition == 0) //if it's 0
 	{
-		//turn effect off, by applying pos voltage to the + side
+
 		TurnOn(RELAY_POS);
-		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_POS);
+		TurnOff(RELAY_NEG);
+		
+		//turn effect off, by applying pos voltage to the + side
+		//Pulsed version
+		//TurnOn(RELAY_POS);
+		//_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
+		//TurnOff(RELAY_POS);
 	}
 	
 	else //if it's 1
 	{
-		//turn effect on, , by applying pos voltage to the - side
+		
 		TurnOn(RELAY_NEG);
-		_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
-		TurnOff(RELAY_NEG);
+		TurnOff(RELAY_POS);
+		
+		
+		//turn effect on, , by applying pos voltage to the - side
+		//Pulsed version
+		//TurnOn(RELAY_NEG);
+		//_delay_ms(RELAY_FLIP_HIGH_VOLTAGE_TIME);
+		//TurnOff(RELAY_NEG);
 	}
 }
 
@@ -122,7 +133,7 @@ void TurnOnEffect()
 {
 	TurnOn(LED); //Drive LED high
 	
-	//TurnOn(FET_MUTE); //Mute
+	TurnOn(FET_MUTE); //Mute
 	FlipRelay(1); //Switch relay position
 	TurnOff(FET_MUTE); //Unmute
 	
@@ -133,9 +144,9 @@ void TurnOffEffect()
 {
 	TurnOff(LED); //Drive LED low
 	
-	//TurnOn(FET_MUTE); //Mute
+	TurnOn(FET_MUTE); //Mute
 	FlipRelay(0); //Switch relay position
-	TurnOn(FET_MUTE); //Mute effect side - ready for next switch
+	TurnOff(FET_MUTE); //Unmute
 	
 	effectState = 0;
 }
@@ -158,6 +169,13 @@ void InitGPIO()
 	
 	//outputs - SET output direction on all of these pins
 	DDRB = (1 << RELAY_POS) | (1 << RELAY_NEG) | (1 << LED) | (1 << FET_MUTE); // Set output direction for these ports
+	
+	//Possible fix for LED issue?
+	_delay_ms(100);
+	_delay_ms(100);
+	_delay_ms(100);
+	_delay_ms(100);
+	_delay_ms(100);
 	
 	//Initial states for outputs
 	TurnOffEffect();
@@ -186,7 +204,7 @@ bool MomentaryTriggerDetectedFromOff()
 	return false;
 }
 
-//Momentary trigger detector from 'On' position - differerent time constants
+//Momentary trigger detector from 'On' position - different time constants
 bool MomentaryTriggerDetectedFromOn()
 {
 	momentaryCounter = 0; //reset
